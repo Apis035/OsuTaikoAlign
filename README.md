@@ -4,6 +4,8 @@ Please stop scattering the notes all over the place when mapping taiko.
 
 # Usage
 
+https://github.com/user-attachments/assets/fe154608-0f6b-4c27-8dd7-a7594d92e037
+
 1. Open a taiko beatmap in osu editor
 2. Click on File > Open .osu in Notepad
 3. Select all text in the opened Notepad window and press Ctrl+C
