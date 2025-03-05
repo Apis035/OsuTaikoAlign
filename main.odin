@@ -272,6 +272,10 @@ AlignObjects :: proc(beatmap: ^Beatmap, style: AlignStyle) {
 	for &o in beatmap.objects {
 		noteType := GetObjectType(o)
 
+		if noteType == .Slider || noteType == .Spinner {
+			continue
+		}
+
 		if style == .Scatter {
 			x := rand.int_max(512)
 			y := rand.int_max(384)
