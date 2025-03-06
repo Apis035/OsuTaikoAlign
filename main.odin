@@ -48,7 +48,7 @@ Main :: proc() -> int {
 		done
 	*/
 
-	fmt.println("* Getting clipboard content")
+	LogStatus("* Getting clipboard content")
 
 	//NOTE: data is using temp_allocator, no need to delete()
 	data, getOk := GetClipboard()
@@ -57,7 +57,7 @@ Main :: proc() -> int {
 		return 1
 	}
 
-	fmt.println("* Parsing beatmap")
+	LogStatus("* Parsing beatmap")
 
 	beatmap, parseErr := ParseBeatmap(data)
 	when DEBUG {
@@ -70,7 +70,6 @@ Main :: proc() -> int {
 		return 1
 	}
 
-	fmt.println()
 	fmt.println("How do you want to align the notes?")
 	fmt.println("   1. All center")
 	fmt.println("   2. Normal center, finisher above")
@@ -80,14 +79,13 @@ Main :: proc() -> int {
 	fmt.println("   6. Scatter all")
 	fmt.print  ("   > ")
 	choice := Choice("123456")
-	fmt.println()
 
-	fmt.println("* Aligning beatmap notes")
+	LogStatus("* Aligning beatmap notes")
 
 	alignStyle := AlignStyle(choice - '1')
 	AlignObjects(&beatmap, alignStyle)
 
-	fmt.println("* Copying processed beatmap into clipboard")
+	LogStatus("* Copying processed beatmap into clipboard")
 
 	beatmapText := UnparseBeatmap(beatmap)
 	defer delete(beatmapText)
@@ -99,8 +97,13 @@ Main :: proc() -> int {
 	}
 
 	fmt.println()
-	fmt.println("Finised. Paste back the processed data into your beatmap.")
+	fmt.println("--- Paste back the processed data into your beatmap. ---")
 	return 0
+}
+
+@(disabled = DEBUG == false)
+LogStatus :: proc(s: string) {
+	fmt.println(s)
 }
 
 /*****************************************************************************/
