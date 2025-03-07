@@ -24,7 +24,6 @@ main :: proc() {
 	windows.SetConsoleOutputCP(.UTF8)
 
 	ret := Main()
-	_getwch()
 
 	when DEBUG {
 		for _, leak in track.allocation_map {
@@ -80,6 +79,10 @@ Main :: proc() -> int {
 	fmt.println("   6. Scatter all")
 	fmt.print  ("   > ")
 	choice := Choice("123456")
+	if choice == CHOICE_CTRL_C {
+		fmt.println("Terminating")
+		return 0
+	}
 
 	LogStatus("* Aligning beatmap notes")
 
@@ -349,25 +352,33 @@ SetClipboard :: proc(data: string) -> (ok: bool) {
 	return true
 }
 
-foreign import "system:libucrt.lib"
-foreign { _getwch :: proc "c" () -> int --- }
+CHOICE_CTRL_C :: 3
 
 Choice :: proc(choices: string) -> rune {
     for {
-        char := cast(rune)_getwch()
+        char := getch()
         for choice in choices do if char == choice {
         	fmt.println(char)
             return char
         }
-        // Force exit
-        if char == 3 {
-        	fmt.println("ctrl+c")
-        	os.exit(1)
+        if char == CHOICE_CTRL_C {
+        	return char
         }
     }
 }
 
 /*****************************************************************************/
+
+getch :: proc() -> (r: rune) {
+	using windows
+	mode, n: DWORD
+	h := GetStdHandle(STD_INPUT_HANDLE)
+	GetConsoleMode(h, &mode)
+	SetConsoleMode(h, mode & ~(ENABLE_LINE_INPUT | ENABLE_ECHO_INPUT | ENABLE_PROCESSED_INPUT))
+	ReadConsoleW(h, &r, 1, &n, nil)
+	SetConsoleMode(h, mode)
+	return
+}
 
 @(deprecated="unhelpful error message")
 GetWindowsErrorMsg :: proc() -> string {
