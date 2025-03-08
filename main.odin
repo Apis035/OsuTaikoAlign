@@ -180,7 +180,7 @@ ParseBeatmap :: proc(data: string) -> (beatmap: Beatmap, err: ParseError) {
 	}
 
 	// Move offset after the section line + newline
-	hoSectionOffset += len(hoSectionName) + 1
+	hoSectionOffset += len(hoSectionName) + 2
 
 	beatmap.unusedData = data[:hoSectionOffset]
 	beatmap.objects = ParseObjects(data[hoSectionOffset:]) or_return
