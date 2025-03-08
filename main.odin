@@ -80,15 +80,23 @@ Main :: proc() -> (MainStatus, string) {
 	LogStatus("* Parsing beatmap")
 
 	beatmap, parseErr := ParseBeatmap(data)
+	defer DeleteBeatmap(beatmap)
+
+	when DEBUG {
+		fmt.println("---- Clipboard data ----")
+		fmt.println(data)
+		fmt.println("---- Clipboard data ----")
+	}
+
+	if parseErr != nil {
+		return.Fail, fmt.tprintf("Fail to parse beatmap. %s.", ParseErrorMessage(parseErr))
+	}
+
 	when DEBUG {
 		fmt.println("---- Beatmap data ----")
 		PrintBeatmap(beatmap)
 		fmt.println("---- Beatmap data ----")
 	}
-	if parseErr != nil {
-		return.Fail, fmt.tprintf("Fail to parse beatmap. %s.", ParseErrorMessage(parseErr))
-	}
-	defer DeleteBeatmap(beatmap)
 
 	fmt.println("How do you want to align the notes?")
 	fmt.println("   1. All center")
