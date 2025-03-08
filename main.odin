@@ -49,6 +49,7 @@ main :: proc() {
 			fmt.println(exitMessage)
 			exitCode = 0
 	}
+	free_all(context.temp_allocator)
 }
 
 MainStatus :: enum {
@@ -87,6 +88,7 @@ Main :: proc() -> (MainStatus, string) {
 	if parseErr != nil {
 		return.Fail, fmt.tprint("Fail to parse beatmap:", parseErr)
 	}
+	defer DeleteBeatmap(beatmap)
 
 	fmt.println("How do you want to align the notes?")
 	fmt.println("   1. All center")
@@ -195,6 +197,10 @@ UnparseBeatmap :: proc(beatmap: Beatmap) -> string {
 	return strings.to_string(sb)
 }
 
+DeleteBeatmap :: proc(beatmap: Beatmap) {
+	delete(beatmap.objects)
+}
+
 ParseObjects :: proc(data: string) -> (hitObjects: Objects, err: ParseError) {
 	ParseIntOrErr :: proc(s: string) -> (value: int, err: ParseError) {
 		v, ok := strconv.parse_int(s)
@@ -207,6 +213,8 @@ ParseObjects :: proc(data: string) -> (hitObjects: Objects, err: ParseError) {
 		(line != "") or_continue
 
 		tokens := strings.split_n(line, ",", 6) or_return
+		defer delete(tokens)
+
 		if len(tokens) < 5 do return hitObjects, .Invalid_HitObject_Data
 
 		o: Object
