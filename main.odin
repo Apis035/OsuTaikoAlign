@@ -35,10 +35,29 @@ main :: proc() {
 
 	windows.SetConsoleOutputCP(.UTF8)
 
-	exitCode = Main()
+	exitStatus, exitMessage := Main()
+	switch exitStatus {
+		case .Ok:
+			fmt.println(exitMessage)
+			getch()
+			exitCode = 0
+		case .Fail:
+			fmt.eprintln(exitMessage)
+			getch()
+			exitCode = 1
+		case .Terminate:
+			fmt.println(exitMessage)
+			exitCode = 0
+	}
 }
 
-Main :: proc() -> int {
+MainStatus :: enum {
+	Ok,
+	Fail,
+	Terminate,
+}
+
+Main :: proc() -> (MainStatus, string) {
 	/*
 		get clipboard data
 		parse beatmap
@@ -54,8 +73,7 @@ Main :: proc() -> int {
 	//NOTE: data is using temp_allocator, no need to delete()
 	data, getOk := GetClipboard()
 	if !getOk {
-		fmt.eprintln("Fail to get clipboard content. Clipboard is empty or does not contain text data.")
-		return 1
+		return .Fail, "Fail to get clipboard content. Clipboard is empty or does not contain text data."
 	}
 
 	LogStatus("* Parsing beatmap")
@@ -67,8 +85,7 @@ Main :: proc() -> int {
 		fmt.println("---- Beatmap data ----")
 	}
 	if parseErr != nil {
-		fmt.eprintln("Fail to parse beatmap:", parseErr)
-		return 1
+		return.Fail, fmt.tprint("Fail to parse beatmap:", parseErr)
 	}
 
 	fmt.println("How do you want to align the notes?")
@@ -80,9 +97,9 @@ Main :: proc() -> int {
 	fmt.println("   6. Scatter all")
 	fmt.print  ("   > ")
 	choice := Choice("123456")
+
 	if choice == CHOICE_CTRL_C {
-		fmt.println("Terminating")
-		return 0
+		return .Terminate, "Terminating"
 	}
 
 	LogStatus("* Aligning beatmap notes")
@@ -97,13 +114,11 @@ Main :: proc() -> int {
 
 	setOk := SetClipboard(beatmapText)
 	if !setOk {
-		fmt.eprintln("Fail to set clipboard content.")
-		return 1
+		return .Fail, "Fail to set clipboard content."
 	}
 
 	fmt.println()
-	fmt.println("--- Paste back the processed data into your beatmap. ---")
-	return 0
+	return .Ok, "--- Paste back the processed data into your beatmap. ---"
 }
 
 @(disabled = DEBUG == false)
