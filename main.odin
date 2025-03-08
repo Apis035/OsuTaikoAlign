@@ -86,7 +86,7 @@ Main :: proc() -> (MainStatus, string) {
 		fmt.println("---- Beatmap data ----")
 	}
 	if parseErr != nil {
-		return.Fail, fmt.tprint("Fail to parse beatmap:", parseErr)
+		return.Fail, fmt.tprintf("Fail to parse beatmap. %s.", ParseErrorMessage(parseErr))
 	}
 	defer DeleteBeatmap(beatmap)
 
@@ -164,8 +164,19 @@ HitObjectParseError :: enum {
 	Invalid_HitObject_Data,
 }
 
-//TODO: translate error enum to message
-//ParseErrorMessage :: proc(err: ParseError) -> string
+ParseErrorMessage :: proc(err: ParseError) -> string {
+	switch err {
+		case .Empty_Data:
+			return "Data is empty"
+		case .Invalid_Beatmap_Data:
+			return "Beatmap data is not valid"
+		case .Invalid_HitObject_Data:
+			return "HitObject data is malformed"
+		case .Out_Of_Memory, .Invalid_Pointer, .Invalid_Argument, .Mode_Not_Implemented:
+			return "Memory allocation failed"
+	}
+	return fmt.tprintf("(unhandled error message: %v)", err)
+}
 
 ParseBeatmap :: proc(data: string) -> (beatmap: Beatmap, err: ParseError) {
 	osuFormatHeader :: "osu file format v14"
