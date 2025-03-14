@@ -68,6 +68,10 @@ Main :: proc() -> (MainStatus, string) {
 		set clipboard data
 		done
 	*/
+	fmt.println("============================================")
+	fmt.println("| OsuTaikoAlign r2                         |")
+	fmt.println("| https://github.com/Apis035/OsuTaikoAlign |")
+	fmt.println("============================================")
 
 	LogStatus("* Getting clipboard content")
 
