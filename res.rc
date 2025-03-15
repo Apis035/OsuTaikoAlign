@@ -1,0 +1,33 @@
+#include "winres.h"
+
+#define RELEASE_VERSION "Release 2"
+
+VS_VERSION_INFO VERSIONINFO
+FILEVERSION     1,0,0,0
+PRODUCTVERSION  1,0,0,0
+FILEFLAGSMASK   VS_FFI_FILEFLAGSMASK
+FILEFLAGS       0
+FILEOS          VOS_NT_WINDOWS32
+FILETYPE        VFT_APP
+FILESUBTYPE     VFT2_UNKNOWN
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "0409FDE9"
+        BEGIN
+            VALUE "CompanyName",      "Apis035"
+            VALUE "ProductName",      "OsuTaikoAlign"
+            VALUE "ProductVersion",   RELEASE_VERSION
+            VALUE "FileDescription",  "OsuTaikoAlign"
+            VALUE "FileVersion",      RELEASE_VERSION
+            VALUE "LegalCopyright",   "Copyright (c) 2025 Apis035"
+        END
+    END
+
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x409, 0xFDE9
+    END
+END
+
+IDI_APP_ICON ICON "icon.ico"
