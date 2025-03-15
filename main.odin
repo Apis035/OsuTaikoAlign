@@ -90,25 +90,19 @@ Main :: proc() -> (MainStatus, string) {
 	if !getOk {
 		return .Fail, "Fail to get clipboard content. Clipboard is empty or does not contain text data."
 	}
-
-	LogStatus("* Parsing beatmap")
-
-	beatmap, parseErr := ParseBeatmap(data)
-
+	
 	when DEBUG {
 		fmt.println("---- Clipboard data ----")
 		fmt.println(data)
 		fmt.println("---- Clipboard data ----")
 	}
 
+	LogStatus("* Parsing beatmap")
+
+	beatmap, parseErr := ParseBeatmap(data)
+
 	if parseErr != nil {
 		return.Fail, fmt.tprintf("Fail to parse beatmap. %s.", ParseErrorMessage(parseErr))
-	}
-
-	when DEBUG {
-		fmt.println("---- Beatmap data ----")
-		PrintBeatmap(beatmap)
-		fmt.println("---- Beatmap data ----")
 	}
 
 	fmt.println("How do you want to align the notes?")
@@ -143,7 +137,7 @@ Main :: proc() -> (MainStatus, string) {
 	return .Ok, "--- Paste back the processed data into your beatmap. ---"
 }
 
-@(disabled = DEBUG == false)
+@(disabled = !DEBUG)
 LogStatus :: proc(s: string) {
 	fmt.println(s)
 }
