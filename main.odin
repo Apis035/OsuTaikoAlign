@@ -3,6 +3,7 @@ package main
 
 import "core:os"
 import "core:mem"
+import "core:mem/virtual"
 import "core:fmt"
 import "core:slice"
 import "core:strings"
@@ -15,6 +16,16 @@ DEBUG :: #config(debug, false)
 main :: proc() {
 	exitCode: int
 	defer os.exit(exitCode)
+
+	arena: virtual.Arena
+	if err := virtual.arena_init_growing(&arena); err != nil {
+		panic("Allocator init failed")
+	}
+	allocator := virtual.arena_allocator(&arena)
+	defer virtual.arena_destroy(&arena)
+
+	context.allocator = allocator
+	context.temp_allocator = allocator
 
 	when DEBUG {
 		track: mem.Tracking_Allocator
@@ -49,7 +60,7 @@ main :: proc() {
 			fmt.println(exitMessage)
 			exitCode = 0
 	}
-	free_all(context.temp_allocator)
+	free_all(context.allocator)
 }
 
 MainStatus :: enum {
@@ -75,7 +86,6 @@ Main :: proc() -> (MainStatus, string) {
 
 	LogStatus("* Getting clipboard content")
 
-	//NOTE: data is using temp_allocator, no need to delete()
 	data, getOk := GetClipboard()
 	if !getOk {
 		return .Fail, "Fail to get clipboard content. Clipboard is empty or does not contain text data."
@@ -84,7 +94,6 @@ Main :: proc() -> (MainStatus, string) {
 	LogStatus("* Parsing beatmap")
 
 	beatmap, parseErr := ParseBeatmap(data)
-	defer DeleteBeatmap(beatmap)
 
 	when DEBUG {
 		fmt.println("---- Clipboard data ----")
@@ -124,7 +133,6 @@ Main :: proc() -> (MainStatus, string) {
 	LogStatus("* Copying processed beatmap into clipboard")
 
 	beatmapText := UnparseBeatmap(beatmap)
-	defer delete(beatmapText)
 
 	setOk := SetClipboard(beatmapText)
 	if !setOk {
@@ -236,7 +244,6 @@ ParseObjects :: proc(data: string) -> (hitObjects: Objects, err: ParseError) {
 		(line != "") or_continue
 
 		tokens := strings.split_n(line, ",", 6) or_return
-		defer delete(tokens)
 
 		if len(tokens) < 5 do return hitObjects, .Invalid_HitObject_Data
 
